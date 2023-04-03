@@ -1,0 +1,272 @@
+{
+    "name": "user stake token",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "owner-pause-pool.scen.json"
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockNonce": "100,500"
+            }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "esdtValue" : [
+                    {
+                        "tokenIdentifier" : "str:MID-123456",
+                        "nonce" : "0",
+                        "value" : "100"
+                    }
+                ],
+                "function" : "stake",
+                "arguments" : ["str:MID-123456"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "4",
+                "message" : "str:paused",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "esdtValue" : [
+                    {
+                        "tokenIdentifier" : "str:MID-123456",
+                        "nonce" : "0",
+                        "value" : "1,000,000,000,000,000,000"
+                    }
+                ],
+                "function" : "fund",
+                "arguments" : ["str:MID-123456"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "4",
+                "message" : "str:paused",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "function" : "claimRewards",
+                "arguments" : ["str:MID-123456", "str:MID-123456"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "0",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "function" : "unstake",
+                "arguments" : ["str:MID-123456", "str:MID-123456", "100"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "4",
+                "message" : "str:Invalid unstake amount",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "function" : "unstake",
+                "arguments" : ["str:MID-123456", "str:MID-123456", "91"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "4",
+                "message" :"str:Invalid unstake amount",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },{
+            "step": "scCall",
+            "tx": {
+                "from": "address:user2",
+                "to" : "sc:staking-contract",
+                "esdtValue" : [
+                    {
+                        "tokenIdentifier" : "str:MID-123456",
+                        "nonce" : "0",
+                        "value" : "1,000,000000000000000000"
+                    }
+                ],
+                "function" : "removePoolFees",
+                "arguments" : ["str:MID-123456","str:TOKEN2-123456"],
+                "gasLimit" : "50,000,000",
+                "gasPrice" : "0"
+            },
+            "expect" : {
+                "out" : [],
+                "status" : "4",
+                "message" : "str:pool paused",
+                "gas" : "*",
+                "refund" : "*"
+            }
+        },
+        {
+            "step" : "checkState",
+            "accounts": {
+                "address:owner":{
+                    "nonce": "4",
+                    "balance" : "0",
+                    "esdt" : {
+                        "str:MID-123456":"200",
+                        "str:TOKEN2-123456":"0"
+                    },
+                    "storage": {}
+                },"address:burn_wallet":{
+                    "nonce": "1",
+                    "balance" : "0",
+                    "esdt" : {
+                        "str:MID-123456":"0"
+                    },
+                    "storage": {}
+                },
+                "address:fee_wallet":{
+                    "nonce": "1",
+                    "balance" : "0",
+                    "esdt" : {
+                        "str:MID-123456":"20",
+                        "str:TOKEN2-123456" :"100,000,000,000,000,000",
+                        "str:TOKEN3-123456" :"100,000,000,000,000,000,000,000"
+                    },
+                    "storage": {}
+                },
+                "address:user1":{
+                    "nonce": "4",
+                    "balance" : "10",
+                    "esdt" : {
+                        "str:MID-123456":"800",
+                        "str:TOKEN2-123456" : "",
+                        "str:TOKEN3-123456" : "4,000,000,000,000,000,000,000,000"
+                    },
+                    "storage": {}
+                },
+                "address:user2":{
+                    "nonce": "11",
+                    "balance" : "10",
+                    "esdt" : {
+                        "str:MID-123456":"99999999999999999999944"
+                    },
+                    "storage": {}
+                },
+                "address:user3": {
+                    "nonce": "1",
+                    "balance": "10",
+                    "esdt": {
+                        "str:ESDT1-123456": "1",
+                        "str:ESDT2-123456": "10",
+                        "str:ESDT3-123456": "100",
+                        "str:ESDT4-123456": "1,000",
+                        "str:ESDT5-123456": "10,000",
+                        "str:ESDT6-123456": "100,000",
+                        "str:ESDT7-123456": "1,000,000",
+                        "str:ESDT8-123456": "10,000,000",
+                        "str:ESDT9-123456": "100,000,000",
+                        "str:ESDT10-123456": "1,000,000,000",
+                        "str:ESDT11-123456": "10,000,000,000",
+                        "str:ESDT12-123456": "100,000,000,000",
+                        "str:ESDT13-123456": "1,000,000,000,000",
+                        "str:ESDT14-123456": "10,000,000,000,000",
+                        "str:ESDT15-123456": "100,000,000,000,000",
+                        "str:ESDT16-123456": "1,000,000,000,000,000",
+                        "str:ESDT17-123456": "10,000,000,000,000,000",
+                        "str:ESDT18-123456": "100,000,000,000,000,000",
+                        "str:ESDT19-123456": "1,000,000,000,000,000,000",
+                        "str:ESDT20-123456": "10,000,000,000,000,000,000",
+                        "str:ESDT21-123456": "100,000,000,000,000,000,000",
+                        "str:ESDT22-123456": "1,000,000,000,000,000,000,000",
+                        "str:ESDT23-123456": "100,000,000,000,000,000,000,000",
+                        "str:ESDT24-123456": "1,000,000,000,000,000,000,000,000",
+                        "str:ESDT25-123456": "10,000,000,000,000,000,000,000,000",
+                        "str:ESDT26-123456": "100,000,000,000,000,000,000,000,000",
+                        "str:ESDT27-123456": "1,000,000,000,000,000,000,000,000,000",
+                        "str:ESDT28-123456": "10,000,000,000,000,000,000,000,000,000"
+                    }
+                },
+                "sc:staking-contract":{
+                    "nonce": "0",
+                    "balance" : "0",
+                    "esdt" : {
+                        "str:MID-123456":"236",
+                        "str:TOKEN2-123456" : "900,000,000,000,000,000",
+                        "str:TOKEN3-123456" : "900,000,000,000,000,000,000,000"
+                    },
+                     "storage": {
+                        "str:defTokenIdentifier" : "str:MID-123456",
+                        "str:feeWallet" : "str:fee_wallet______________________",
+                        "str:burnWallet" : "str:burn_wallet_____________________",
+                        "str:removeFeesPrice" : "1000000000000000000000",
+
+                        "str:stakedTokens.len": "u8:2",
+                        "str:stakedTokens.item|u32:1" : "str:MID-123456",
+                        "str:stakedTokens.index|u32:10|str:MID-123456" : "u8:1",
+                        "str:stakedTokens.item|u32:2" : "str:TOKEN3-123456",
+                        "str:stakedTokens.index|u32:13|str:TOKEN3-123456" : "u8:2",
+
+
+                        "str:rewardedTokens|u32:10|str:MID-123456.len" : "u8:2",
+                        
+                        "str:rewardedTokens|u32:10|str:MID-123456.item|u32:2" : "str:MID-123456",
+                        "str:rewardedTokens|u32:10|str:MID-123456.index|u32:10|str:MID-123456"  : "u8:2",
+                        "str:tokenPosition|u32:10|str:MID-123456|u32:10|str:MID-123456" : "0x00000000000003e800000000000000000000000192000000015a000000012200000000000028a0010000000000503340" ,
+                        
+                        "str:rewardedTokens|u32:10|str:MID-123456.item|u32:1" : "str:TOKEN2-123456",
+                        "str:rewardedTokens|u32:10|str:MID-123456.index|u32:13|str:TOKEN2-123456" : "u8:1",
+                        "str:tokenPosition|u32:10|str:MID-123456|u32:13|str:TOKEN2-123456" : "0x00000000000003e80000000000000000000000080c7d713b49da0000000000000000000000000000000028a0010000000000503340",
+                        
+
+                        "str:rewardedTokens|u32:13|str:TOKEN3-123456.item|u32:1" : "str:TOKEN3-123456",
+                        "str:rewardedTokens|u32:13|str:TOKEN3-123456.len" : "u8:1",
+                        "str:rewardedTokens|u32:13|str:TOKEN3-123456.index|u32:13|str:TOKEN3-123456" : "u8:1",
+                        "str:tokenPosition|u32:13|str:TOKEN3-123456|u32:13|str:TOKEN3-123456" : "0x00000000000003e800000000000000000000000abe951906eba2aa800000000000000000000000000000000028a0000000000000503340",
+
+                        
+                        "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.len" : "u8:1",
+                        "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.indexuser2___________________________" : "u8:1",
+                        "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.item|u32:1" : "str:user2___________________________",
+                        "str:stakingPositionuser2___________________________|u32:10|str:MID-123456|u32:10|str:MID-123456" : "0x000000015a0000000000018894"
+
+                    },
+                    "code" :  "file:../output/staking-contract.wasm"
+                }
+            }
+
+        }
+    ]
+}
