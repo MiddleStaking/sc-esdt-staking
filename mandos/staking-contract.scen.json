@@ -85,7 +85,7 @@
                 "from": "address:owner",
                 "contractCode": "file:../output/staking-contract.wasm",
                 "arguments": ["str:MID-123456", "address:fee_wallet", "address:burn_wallet",  "1,000,000,000,000,000,000,000"],
-                "gasLimit": "6,000,000",
+                "gasLimit": "60,000,000",
                 "gasPrice": "0"
             },
             "expect": {
