@@ -1,3 +1,5 @@
+# run-scenarios "/Users/kevinlallement/MultiversX/SmartContracts/staking-contract"
+
 OWNER_PEM="~/MultiversX/wallets/wallet.pem"
 USER_PEM="~/MultiversX/wallets/wallet1.pem"
 USER_PEM2="~/MultiversX/wallets/wallet2.pem"
@@ -15,10 +17,6 @@ BURN_PERC=6600
 
 
 #DEVNET : 
-SC_ADDRESS="erd1qqqqqqqqqqqqqpgqhcj6ez8y3zvctjtm78flxvqkedn7peh4ch9shlfnmr"
-#FAST 10DAYS
-SC_ADDRESS="erd1qqqqqqqqqqqqqpgq0jmmq90wqrp2qrvmnqsfplwkrx02w6lvch9semu4hn"
-#NEWEST
 SC_ADDRESS="erd1qqqqqqqqqqqqqpgq4dvqaez22usynmp7e3w957q24m6740nkch9s5lvlc7"
 PROXY="https://devnet-gateway.multiversx.com"
 CHAIN_ID="D"
@@ -43,11 +41,11 @@ BLOCSPEEDYY=10512000
 
 CUTFEESVALUE=5000000000000000000000
 
-# #TETNET :
+# #MAINNET :
 # SC_ADDRESS="erd1qqqqqqqqqqqqqpgqnyaznr0q3m8u79secaydqtedktp59r2dch9syz2wlf"
-# PROXY="https://testnet-gateway.multiversx.com"
-# CHAIN_ID="T"
-# TOKEN_IDENTIFIER="str:TAST-f329a1"
+# PROXY="https://gateway.multiversx.com"
+# CHAIN_ID="1"
+# TOKEN_IDENTIFIER="str:MID-ec"
 # TOKEN_IDENTIFIER2="str:OFD-b9989d"
 # STAKE_AMOUNT=1000000000000000000
 # UNSTAKE_AMOUNT=1000000000000000
@@ -66,6 +64,7 @@ deploy() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 # mxpy contract deploy --ledger --ledger-address-index 2 --bytecode=output/staking-contract.wasm --gas-limit=60000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --arguments str:"MID-7f1d59" "erd1u8nxp4kkt3jqj3uxfftklwntf4fcu3tc9m4h7l9vgyv9l3zd58aqwnn6xz" "erd1r9j4wwjw7qxqv8ztrl7spdsjwq2lcay2cjj9hl9mg2qvnc82hs3qurz6su" 5000000000000000000000
+# mxpy contract deploy --ledger --ledger-address-index 2 --bytecode=output/staking-contract.wasm --gas-limit=60000000 --recall-nonce --proxy="https://gateway.multiversx.com" --chain 1 --send --arguments str:"MID-ecb7bf" "erd1u8nxp4kkt3jqj3uxfftklwntf4fcu3tc9m4h7l9vgyv9l3zd58aqwnn6xz" "erd1r9j4wwjw7qxqv8ztrl7spdsjwq2lcay2cjj9hl9mg2qvnc82hs3qurz6su" 5000000000000000000000
 
 #Met à jour le contrat
 upgrade() {
@@ -77,7 +76,8 @@ upgrade() {
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
-# mxpy contract upgrade erd1qqqqqqqqqqqqqpgql0kxfx57glyphswgu4vghqjv55g443z7txfqp7kgfw --ledger --ledger-address-index 2 --bytecode=output/staking-contract.wasm --gas-limit=60000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --arguments str:"MID-7f1d59" "erd1u8nxp4kkt3jqj3uxfftklwntf4fcu3tc9m4h7l9vgyv9l3zd58aqwnn6xz" "erd1r9j4wwjw7qxqv8ztrl7spdsjwq2lcay2cjj9hl9mg2qvnc82hs3qurz6su" 5000000000000000000000
+# mxpy contract upgrade erd1qqqqqqqqqqqqqpgq4dvqaez22usynmp7e3w957q24m6740nkch9s5lvlc7 --ledger --ledger-address-index 2 --bytecode=output/staking-contract.wasm --gas-limit=60000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --arguments str:"MID-7f1d59" "erd1u8nxp4kkt3jqj3uxfftklwntf4fcu3tc9m4h7l9vgyv9l3zd58aqwnn6xz" "erd1r9j4wwjw7qxqv8ztrl7spdsjwq2lcay2cjj9hl9mg2qvnc82hs3qurz6su" 5000000000000000000000
+# mxpy contract upgrade erd1qqqqqqqqqqqqqpgqgdf6vk43c2jxk4a6nw2adv8vmnpqagegtxfqmf8et2 --ledger --ledger-address-index 2 --bytecode=output/staking-contract.wasm --gas-limit=60000000 --recall-nonce --proxy="https://gateway.multiversx.com" --chain 1 --send --arguments str:"MID-ecb7bf" "erd1u8nxp4kkt3jqj3uxfftklwntf4fcu3tc9m4h7l9vgyv9l3zd58aqwnn6xz" "erd1r9j4wwjw7qxqv8ztrl7spdsjwq2lcay2cjj9hl9mg2qvnc82hs3qurz6su" 5000000000000000000000
 
 #configure les frais et burn pour une pool
 #FEES BURN opt:speed
@@ -89,7 +89,8 @@ setFees() {
     --function="setFees" \
     --arguments ${T_MID} ${T_MID} "400" "100"
 }
-# mxpy contract call erd1qqqqqqqqqqqqqpgql0kxfx57glyphswgu4vghqjv55g443z7txfqp7kgfw --ledger --ledger-address-index 2 --gas-limit=10000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="setFees" --arguments str:"MID-7f1d59" str:"MID-7f1d59" "400" "100"
+# mxpy contract call erd1qqqqqqqqqqqqqpgq4dvqaez22usynmp7e3w957q24m6740nkch9s5lvlc7 --ledger --ledger-address-index 2 --gas-limit=10000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="setFees" --arguments str:"MID-7f1d59" str:"MID-7f1d59" "400" "100"
+# mxpy contract call erd1qqqqqqqqqqqqqpgqgdf6vk43c2jxk4a6nw2adv8vmnpqagegtxfqmf8et2 --ledger --ledger-address-index 2 --gas-limit=10000000 --recall-nonce --proxy="https://gateway.multiversx.com" --chain 1 --send --function="setFees" --arguments str:"MID-ecb7bf" str:"MID-ecb7bf" "400" "100"
 
 #Met en pause les fonction des fund et stake (allPool)
 pause() {
@@ -99,7 +100,8 @@ pause() {
     --gas-limit=10000000 \
     --function="pause"
 }
-# mxpy contract call erd1qqqqqqqqqqqqqpgql0kxfx57glyphswgu4vghqjv55g443z7txfqp7kgfw --ledger --ledger-address-index 2 --gas-limit=10000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="pause"
+# mxpy contract call erd1qqqqqqqqqqqqqpgq4dvqaez22usynmp7e3w957q24m6740nkch9s5lvlc7 --ledger --ledger-address-index 2 --gas-limit=5000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="pause"
+# mxpy contract call erd1qqqqqqqqqqqqqpgqgdf6vk43c2jxk4a6nw2adv8vmnpqagegtxfqmf8et2 --ledger --ledger-address-index 2 --gas-limit=5000000 --recall-nonce --proxy="https://gateway.multiversx.com" --chain 1 --send --function="pause"
 
 #fin de pause fund et stake (allPool)
 unpause() {
@@ -109,7 +111,8 @@ unpause() {
     --gas-limit=10000000 \
     --function="unpause"
 }
-# mxpy contract call erd1qqqqqqqqqqqqqpgql0kxfx57glyphswgu4vghqjv55g443z7txfqp7kgfw --ledger --ledger-address-index 2 --gas-limit=10000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="unpause"
+# mxpy contract call erd1qqqqqqqqqqqqqpgq4dvqaez22usynmp7e3w957q24m6740nkch9s5lvlc7 --ledger --ledger-address-index 2 --gas-limit=5000000 --recall-nonce --proxy="https://devnet-gateway.multiversx.com" --chain D --send --function="unpause"
+# mxpy contract call erd1qqqqqqqqqqqqqpgqgdf6vk43c2jxk4a6nw2adv8vmnpqagegtxfqmf8et2 --ledger --ledger-address-index 2 --gas-limit=5000000 --recall-nonce --proxy="https://gateway.multiversx.com" --chain 1 --send --function="unpause"
 
 
 
@@ -254,3 +257,5 @@ calculateRewardsForUser() {
     --function="calculateRewardsForUser" \
     --arguments ${USER_ADDRESS} ${TOKEN_IDENTIFIER} ${TOKEN_IDENTIFIER}
 }
+
+

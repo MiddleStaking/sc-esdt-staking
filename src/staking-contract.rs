@@ -145,7 +145,25 @@ pause_module::PauseModule+views_module::ViewsModule {
             }
         };
 
-        self.claim_rewards_for_user(&caller, &mut staking_pos, &mut token_pos, &rewarded_token);
+        //ajout : eviter le renvoi de dust sur le wallet user quand c'est possible
+        if payment.token_identifier == rewarded_token
+        {
+            let reward_amount = self.calculate_rewards(&staking_pos, &token_pos);
+
+            if reward_amount > 0 {
+                let current_block = self.blockchain().get_block_nonce();
+                staking_pos.last_action_block = current_block;
+                staking_pos.stake_amount += &reward_amount;
+
+                token_pos.balance -= &reward_amount;
+                token_pos.total_rewarded += &reward_amount;
+                token_pos.total_stake += &reward_amount;
+            }
+        }
+        else{
+            self.claim_rewards_for_user(&caller, &mut staking_pos, &mut token_pos, &rewarded_token);
+        }
+
 
         staking_pos.stake_amount += &payment.amount;
         token_pos.total_stake += &payment.amount;
@@ -248,11 +266,11 @@ pause_module::PauseModule+views_module::ViewsModule {
         if reward_amount > 0 {
             let current_block = self.blockchain().get_block_nonce();
             staking_pos.last_action_block = current_block;
+            staking_pos.stake_amount += &reward_amount;
 
             token_pos.balance -= &reward_amount;
             token_pos.total_rewarded += &reward_amount;
             token_pos.total_stake += &reward_amount;
-            staking_pos.stake_amount += &reward_amount
         }
 
         stake_mapper.set(&staking_pos);
