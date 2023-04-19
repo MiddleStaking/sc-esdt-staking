@@ -592,6 +592,7 @@ pause_module::PauseModule+views_module::ViewsModule {
         result.push(token_pos.last_fund_block.into());
         result.push(u8::from(token_pos.paused).into());
         result.push(token_pos.blocks_to_max.into());
+        result.push(self.staked_addresses(&staked_token, &rewarded_token).len().into());
         result
     }
 
