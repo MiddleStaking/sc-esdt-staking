@@ -18,7 +18,10 @@ pub trait ViewsModule {
     #[view(getFeeWallet)]
     #[storage_mapper("feeWallet")]
     fn fee_wallet(&self) -> SingleValueMapper<ManagedAddress>;
-
+    //Fee wallet
+    #[view(getFeePercent)]
+    #[storage_mapper("feePercent")]
+    fn fee_percent(&self) -> SingleValueMapper<u64>;
     //removeFeesPrice
     #[view(getRemoveFeesPrice)]
     #[storage_mapper("removeFeesPrice")]
@@ -37,6 +40,5 @@ pub trait ViewsModule {
     #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self, staked_token: &TokenIdentifier, rewarded_token: &TokenIdentifier) -> UnorderedSetMapper<ManagedAddress>;
-
     
 }

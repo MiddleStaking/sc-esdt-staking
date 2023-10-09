@@ -9,16 +9,18 @@ mod staking_info;
 
 use staking_info::StakingPosition;
 use staking_info::TokenPosition;
+use staking_info::TokenPositionView;
+use staking_info::StakingPositionView;
+use staking_info::RewardsView;
 
 pub const BLOCKS_IN_YEAR: u64 = 60 * 60 * 24 * 365 / 6;
 pub const MAX_PERCENTAGE: u64 = 10_000;
-pub const DEF_FEES_PERCENTAGE: u64 = 1_000;
 pub const DEF_BURN_PERCENTAGE: u64 = 0;
 pub const CLOSE_POOL_LOW_GAS_LIMIT: u64 = 5_000_000;
+pub const DECIMALS: usize = 18;
 
 #[multiversx_sc::contract]
-pub trait StakingContract:
-pause_module::PauseModule+views_module::ViewsModule {
+pub trait StakingContract:pause_module::PauseModule+views_module::ViewsModule {
     
     #[init]
     fn init(
@@ -26,16 +28,14 @@ pause_module::PauseModule+views_module::ViewsModule {
         def_staked_token: TokenIdentifier,
         fee_wallet: ManagedAddress,
         burn_wallet: ManagedAddress,
-        remove_fees_price: BigUint
+        remove_fees_price: BigUint,
+        fee_percent: u64
     ) {
-        require!(
-            def_staked_token.is_valid_esdt_identifier(),
-            "Invalid token"
-        );
         self.def_token_identifier().set(def_staked_token);
         self.burn_wallet().set(burn_wallet);
         self.fee_wallet().set(fee_wallet);
         self.remove_fees_price().set(remove_fees_price);
+        self.fee_percent().set(fee_percent);
     }
 
     //Send ESDT to contract as a staking reward
@@ -56,7 +56,7 @@ pause_module::PauseModule+views_module::ViewsModule {
             token_mapper.get()
         } else {
             TokenPosition {
-                fee_percentage: DEF_FEES_PERCENTAGE,
+                fee_percentage: self.fee_percent().get(),
                 burn_percentage: DEF_BURN_PERCENTAGE,
                 balance: BigUint::zero(),
                 total_stake: BigUint::zero(),
@@ -72,11 +72,13 @@ pause_module::PauseModule+views_module::ViewsModule {
         self.staked_tokens().insert(staked_token.clone());
         self.rewarded_tokens(&staked_token).insert(payment.token_identifier.clone());
 
+
         let fee_amount = if token_pos.fee_percentage > 0 {
             &payment.amount * token_pos.fee_percentage / MAX_PERCENTAGE
         } else {
             BigUint::zero()
         };
+
         //burn (is not a real burn)
         //tokens are sent to a distinct wallet
         let burn_amount = if token_pos.burn_percentage > 0 {
@@ -92,10 +94,34 @@ pause_module::PauseModule+views_module::ViewsModule {
         );
         let fund_amount = &payment.amount - &fee_amount - &burn_amount;
 
-        if fee_amount > 0 {
-            let fee_wallet = self.fee_wallet().get();
-            self.send()
-                .direct_esdt(&fee_wallet, &payment.token_identifier, 0, &fee_amount);
+        //Si on a des frais 
+        if fee_amount > 0 { 
+            //si le staked token n'est pas du mid on le donne en rewards aux holder de mid
+            if staked_token != self.def_token_identifier().get() {
+                let fees_mapper = self.token_position(&self.def_token_identifier().get(), &payment.token_identifier);
+                let mut fees_pos = if !fees_mapper.is_empty() {
+                    fees_mapper.get()
+                } else {
+                    TokenPosition {
+                        fee_percentage: self.fee_percent().get(),
+                        burn_percentage: DEF_BURN_PERCENTAGE,
+                        balance: BigUint::zero(),
+                        total_stake: BigUint::zero(),
+                        total_rewarded: BigUint::zero(),
+                        last_fund_block: self.blockchain().get_block_nonce(),
+                        paused: false,
+                        blocks_to_max: BLOCKS_IN_YEAR,
+                    }
+                };
+                fees_pos.balance += fee_amount;
+                fees_mapper.set(&fees_pos);
+            }
+            else{
+                //Si c'est déjà pour les holder on envoi dans le wallet fees
+                let fee_wallet = self.fee_wallet().get();
+                self.send()
+                    .direct_esdt(&fee_wallet, &payment.token_identifier, 0, &fee_amount);
+            }
         }
         if burn_amount > 0 {
             let burn_wallet = self.burn_wallet().get();
@@ -105,7 +131,6 @@ pause_module::PauseModule+views_module::ViewsModule {
 
         token_pos.balance += fund_amount;
         token_pos.last_fund_block=self.blockchain().get_block_nonce();
-
         token_mapper.set(&token_pos);
     }
 
@@ -447,7 +472,7 @@ pause_module::PauseModule+views_module::ViewsModule {
             token_mapper.get()
         } else {
             TokenPosition {
-                fee_percentage: DEF_FEES_PERCENTAGE,
+                fee_percentage: self.fee_percent().get(),
                 burn_percentage: DEF_BURN_PERCENTAGE,
                 balance: BigUint::zero(),
                 total_stake: BigUint::zero(),
@@ -478,7 +503,8 @@ pause_module::PauseModule+views_module::ViewsModule {
         def_staked_token: TokenIdentifier,
         fee_wallet: ManagedAddress,
         burn_wallet: ManagedAddress,
-        remove_fees_price: BigUint
+        remove_fees_price: BigUint,
+        fee_percent: u64
     ){
         require!(
             def_staked_token.is_valid_esdt_identifier(),
@@ -488,6 +514,7 @@ pause_module::PauseModule+views_module::ViewsModule {
         self.burn_wallet().set(burn_wallet);
         self.fee_wallet().set(fee_wallet);
         self.remove_fees_price().set(remove_fees_price);
+        self.fee_percent().set(fee_percent);
     }
 
     //Pause existing pool
@@ -596,6 +623,74 @@ pause_module::PauseModule+views_module::ViewsModule {
         result
     }
 
+    #[view(getAllTokenPosition)]
+    fn all_token_position_detail(
+        &self,
+        staked_token: &TokenIdentifier,
+    ) -> ManagedVec<TokenPositionView<Self::Api>> {
+
+        let mut rewards: ManagedVec<TokenPositionView<Self::Api>> = ManagedVec::new();
+        for rewarded_token in self.rewarded_tokens(staked_token).into_iter() {
+            let token_pos = self.token_position(&staked_token, &rewarded_token).get();
+
+            rewards.push(
+                TokenPositionView {
+                    rewarded_token: rewarded_token.clone(),
+                    token_position: token_pos,
+                    staked_addresses: self.staked_addresses(&staked_token, &rewarded_token).len()
+                }
+            );
+        }
+        rewards
+    }
+    #[view(getAllStakingPosition)]
+    fn all_staking_position_detail(
+        &self,
+        addr: ManagedAddress,
+        staked_token: &TokenIdentifier,
+    ) -> ManagedVec<StakingPositionView<Self::Api>> {
+
+        let mut staked: ManagedVec<StakingPositionView<Self::Api>> = ManagedVec::new();
+        for rewarded_token in self.rewarded_tokens(staked_token).into_iter() {
+            let staking_map = self.staking_position(&addr, &staked_token, &rewarded_token);
+            if !staking_map.is_empty() {
+                staked.push(
+                    StakingPositionView {
+                        rewarded_token: rewarded_token.clone(),
+                        staking_position: staking_map.get()
+                    }
+                );
+            }
+        }
+        staked
+    }
+    #[view(getAllUserRewards)]
+    fn all_user_rewards(
+        &self,
+        addr: ManagedAddress,
+        staked_token: &TokenIdentifier,
+    ) -> ManagedVec<RewardsView<Self::Api>> {
+
+        let mut rewards: ManagedVec<RewardsView<Self::Api>> = ManagedVec::new();
+        for rewarded_token in self.rewarded_tokens(staked_token).into_iter() {
+            let staking_map = self.staking_position(&addr, &staked_token, &rewarded_token);
+            if !staking_map.is_empty() {
+                let token_map = self.token_position(&staked_token, &rewarded_token);
+                if !token_map.is_empty() {
+                    let staking_pos = staking_map.get();
+                    let token_pos = token_map.get();
+                    rewards.push(
+                        RewardsView {
+                            rewarded_token: rewarded_token.clone(),
+                            rewards: self.calculate_rewards(&staking_pos, &token_pos)
+                        }
+                    );    
+                }
+            }
+        }
+        rewards
+    }
+ 
     //USER POSITION IN POOL STORAGE
     #[storage_mapper("stakingPosition")]
     fn staking_position(
