@@ -5,12 +5,15 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           24
+// Endpoints:                           28
 // Async Callback (empty):               1
-// Total number of exported functions:  26
+// Total number of exported functions:  30
 
 #![no_std]
-#![feature(alloc_error_handler, lang_items)]
+
+// Configuration that works with rustc < 1.73.0.
+// TODO: Recommended rustc version: 1.73.0 or newer.
+#![feature(lang_items)]
 
 multiversx_sc_wasm_adapter::allocator!();
 multiversx_sc_wasm_adapter::panic_handler!();
@@ -18,31 +21,36 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     staking_contract
     (
-        fund
-        stake
-        unstake
-        claimRewards
-        stakeRewards
-        removePoolFees
-        setFees
-        setConfig
-        pausePool
-        unpausePool
-        closePool
-        getTokenPosition
-        getStakingPosition
-        calculateRewardsForUser
-        isPaused
-        pause
-        unpause
-        getDefTokenIdentifier
-        getBurnWallet
-        getFeeWallet
-        getRemoveFeesPrice
-        getStakedTokens
-        getRewardedTokens
-        getStakedAddresses
+        init => init
+        fund => fund
+        stake => stake
+        unstake => unstake
+        claimRewards => claim_rewards
+        stakeRewards => stake_rewards
+        removePoolFees => remove_pool_fees
+        setFees => set_fees
+        setConfig => set_config
+        pausePool => pause_pool
+        unpausePool => unpause_pool
+        closePool => close_pool
+        getTokenPosition => token_position_detail
+        getAllTokenPosition => all_token_position_detail
+        getAllStakingPosition => all_staking_position_detail
+        getAllUserRewards => all_user_rewards
+        getStakingPosition => staking_position_detail
+        calculateRewardsForUser => calculate_rewards_for_user
+        isPaused => is_paused
+        pause => pause_endpoint
+        unpause => unpause_endpoint
+        getDefTokenIdentifier => def_token_identifier
+        getBurnWallet => burn_wallet
+        getFeeWallet => fee_wallet
+        getFeePercent => fee_percent
+        getRemoveFeesPrice => remove_fees_price
+        getStakedTokens => staked_tokens
+        getRewardedTokens => rewarded_tokens
+        getStakedAddresses => staked_addresses
     )
 }
 
-multiversx_sc_wasm_adapter::empty_callback! {}
+multiversx_sc_wasm_adapter::async_callback_empty! {}

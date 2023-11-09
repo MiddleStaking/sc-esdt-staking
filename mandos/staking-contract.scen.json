@@ -84,7 +84,7 @@
             "tx": {
                 "from": "address:owner",
                 "contractCode": "file:../output/staking-contract.wasm",
-                "arguments": ["str:MID-123456", "address:fee_wallet", "address:burn_wallet",  "1,000,000,000,000,000,000,000"],
+                "arguments": ["str:MID-123456", "address:fee_wallet", "address:burn_wallet",  "1,000,000,000,000,000,000,000", "1000"],
                 "gasLimit": "60,000,000",
                 "gasPrice": "0"
             },

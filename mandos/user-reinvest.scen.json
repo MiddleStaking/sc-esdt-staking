@@ -53,7 +53,7 @@
                     "esdt" : {
                         "str:MID-123456":"20",
                         "str:TOKEN2-123456" : "100,000,000,000,000,000",
-                        "str:TOKEN3-123456" :"100,000,000,000,000,000,000,000"
+                        "str:TOKEN3-123456" :""
                     },
                     "storage": {}
                 },
@@ -114,13 +114,14 @@
                     "esdt" : {
                         "str:MID-123456":"280",
                         "str:TOKEN2-123456" : "900,000,000,000,000,000",
-                        "str:TOKEN3-123456" : "900,000,000,000,000,000,000,000"
+                        "str:TOKEN3-123456" : "1,000,000,000,000,000,000,000,000"
                     },
                     "storage": {
                         "str:defTokenIdentifier" : "str:MID-123456",
                         "str:feeWallet" : "str:fee_wallet______________________",
                         "str:burnWallet" : "str:burn_wallet_____________________",
                         "str:removeFeesPrice" : "1000000000000000000000",
+                        "str:feePercent" : "1000",
 
                         "str:stakedTokens.len": "u8:2",
                         "str:stakedTokens.item|u32:1" : "str:MID-123456",
@@ -144,8 +145,8 @@
                         "str:rewardedTokens|u32:13|str:TOKEN3-123456.len" : "u8:1",
                         "str:rewardedTokens|u32:13|str:TOKEN3-123456.index|u32:13|str:TOKEN3-123456" : "u8:1",
                         "str:tokenPosition|u32:13|str:TOKEN3-123456|u32:13|str:TOKEN3-123456" : "0x00000000000003e800000000000000000000000abe951906eba2aa800000000000000000000000000000000028a0000000000000503340",
+                        "str:tokenPosition|u32:10|str:MID-123456|u32:13|str:TOKEN3-123456": "0x00000000000003e800000000000000000000000a152d02c7e14af6800000000000000000000000000000000028a0000000000000503340",
 
-                        
                         "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.len" : "u8:1",
                         "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.indexuser2___________________________" : "u8:1",
                         "str:stakedAddresses|u32:10|str:MID-123456|u32:10|str:MID-123456.item|u32:1" : "str:user2___________________________",
